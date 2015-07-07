@@ -1,0 +1,12 @@
+[submodule "tools/llvm-objcopy"]
+	path = tools/llvm-objcopy
+	url = https://github.com/Modkit/llvm-objcopy.git
+	branch = micro-compiler
+[submodule "tools/lld"]
+	path = tools/lld
+	url = https://github.com/Modkit/lld.git
+	branch = micro-compiler
+[submodule "tools/clang"]
+	path = tools/clang
+	url = https://github.com/Modkit/clang.git
+	branch = micro-compiler
