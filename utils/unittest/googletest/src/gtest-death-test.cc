@@ -34,11 +34,20 @@
 #include "gtest/gtest-death-test.h"
 #include "gtest/internal/gtest-port.h"
 
+
+
+#if GTEST_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
+#define USE_NSGETENVIRON 1
+#else
+#define USE_NSGETENVIRON 0
+#endif
+
+
 #if GTEST_HAS_DEATH_TEST
 
-# if GTEST_OS_MAC
+# if USE_NSGETENVIRON
 #  include <crt_externs.h>
-# endif  // GTEST_OS_MAC
+# endif  // USE_NSGETENVIRON
 
 # include <errno.h>
 # include <fcntl.h>
@@ -883,19 +892,20 @@ struct ExecDeathTestArgs {
   int close_fd;       // File descriptor to close; the read end of a pipe
 };
 
-#  if GTEST_OS_MAC
+#  if USE_NSGETENVIRON
 inline char** GetEnviron() {
   // When Google Test is built as a framework on MacOS X, the environ variable
   // is unavailable. Apple's documentation (man environ) recommends using
   // _NSGetEnviron() instead.
   return *_NSGetEnviron();
 }
-#  else
+#    else
 // Some POSIX platforms expect you to declare environ. extern "C" makes
 // it reside in the global namespace.
 extern "C" char** environ;
 inline char** GetEnviron() { return environ; }
-#  endif  // GTEST_OS_MAC
+#  endif  // USE_NSGETENVIRON
+
 
 // The main function for a threadsafe-style death test child process.
 // This function is called in a clone()-ed process and thus must avoid
@@ -923,6 +933,7 @@ static int ExecDeathTestChildMain(void* child_arg) {
   // invoke the test program via a valid path that contains at least
   // one path separator.
   execve(args->argv[0], args->argv, GetEnviron());
+    
   DeathTestAbort(String::Format("execve(%s, ...) in %s failed: %s",
                                 args->argv[0],
                                 original_dir,

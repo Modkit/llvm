@@ -14,7 +14,11 @@
 #include "llvm/Support/raw_ostream.h"
 #include <stdio.h>
 #ifdef HAVE_LIBEDIT
-#include <histedit.h>
+# if defined(__APPLE__) && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
+#  undef HAVE_LIBEDIT
+# else
+#  include <histedit.h>
+# endif// APPLE && !IOS
 #endif
 
 using namespace llvm;

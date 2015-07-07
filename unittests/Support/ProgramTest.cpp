@@ -13,8 +13,15 @@
 #include "llvm/Support/Program.h"
 #include "gtest/gtest.h"
 #include <stdlib.h>
-#if defined(__APPLE__)
-# include <crt_externs.h>
+#if defined(__APPLE__) && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
+#define USE_NSGETENVIRON 1
+#else
+#define USE_NSGETENVIRON 0
+#endif
+
+#if USE_NSGETENVIRON
+#   include <crt_externs.h>
+# endif //!(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
 #elif !defined(_MSC_VER)
 // Forward declare environ in case it's not provided by stdlib.h.
 extern char **environ;
@@ -58,8 +65,8 @@ static cl::opt<std::string>
 ProgramTestStringArg2("program-test-string-arg2");
 
 static void CopyEnvironment(std::vector<const char *> &out) {
-#ifdef __APPLE__
-  char **envp = *_NSGetEnviron();
+#if USE_NSGETENVIRON
+   char **envp = *_NSGetEnviron();
 #else
   // environ seems to work for Windows and most other Unices.
   char **envp = environ;
